@@ -11,7 +11,8 @@ But to use it in your drive, simply write the below command in cmd inside that d
 ( Generates configuration and solution files for Visual Studio Code 2019).
 Or simply change "vs2019" to "xcode4" to use it your macOS. 
 
-For more action go to the Premake 5 Wiki. 'https://github.com/premake/premake-core/wiki/Using-Premake'
+For more action go to the Premake 5 Wiki. :
+                        
+                            'https://github.com/premake/premake-core/wiki/Using-Premake'
 
-Provide us some good changes or may be add new features .
-
+Provide us some good changes or may be add new features. Also Help us to maintain the code so that it is easier for you all to code it as well as use it.
