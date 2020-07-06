@@ -15,4 +15,4 @@ For more action go to the Premake 5 Wiki. :
                         
                             'https://github.com/premake/premake-core/wiki/Using-Premake'
 
-Provide us some good changes or may be add new features. Also Help us to maintain the code so that it is easier for you all to code it as well as use it.
+Provide us with some good changes or may add new features. Also Help us to maintain the code so that it is easier for you all to code it as well as use it.
