@@ -1,5 +1,6 @@
 #include "ComputeMat.h"
 #include "Core.h"
+#include "MatAndVal.h"
 
 namespace BM {
 	//GLOBAL SCOPED VARIABLES
@@ -40,6 +41,54 @@ namespace BM {
 	}
 
 	//--------------------------------------------------------------
+
+	//
+
+	mat& mat::transpose() {
+		cl::Context context({ defaultDevice });
+
+		// kernel calculates for each element C=A+B
+		std::string kernel_code =
+			"   __kernel void addMat(__global float* A, __global float* B,int x,int y){    "
+			"		int i = get_global_id(0);												"
+			"		int row = i / y;														"
+			"		int col = i % y;														"
+			"		int id = col*x+row;														"
+			"       B[id]=A[i];																"
+			"   }																			";
+
+		cl::Program::Sources sources(1, std::make_pair(kernel_code.c_str(), kernel_code.length() + 1));
+
+		cl::Program program(context, sources);
+		auto err = program.build("-cl-std=CL1.2");
+
+		int total = x * y;
+		cl::Buffer bufferA(context, CL_MEM_READ_WRITE, sizeof(float) * total);
+		cl::Buffer bufferB(context, CL_MEM_READ_WRITE, sizeof(float) * total);
+
+		cl::CommandQueue queue(context, defaultDevice);
+
+		queue.enqueueWriteBuffer(bufferA, CL_TRUE, 0, sizeof(float) * total, data);
+
+		cl::Kernel kernel_add(program, "addMat");
+		kernel_add.setArg(0, bufferA);
+		kernel_add.setArg(1, bufferB);
+		kernel_add.setArg(2, sizeof(int),(void *)&x);
+		kernel_add.setArg(3,sizeof(int) ,(void *)&y);
+
+		queue.enqueueNDRangeKernel(kernel_add, cl::NullRange, cl::NDRange(total), cl::NullRange);
+		queue.finish();
+
+		queue.enqueueReadBuffer(bufferB, CL_TRUE, 0, sizeof(float) * total, data);
+
+		int temp = x;
+		x = y;
+		y = temp;
+		cl::finish();
+		return *this;
+	}
+
+	//
 
 	// Addition operation changes the matrix through which it is called
 
@@ -89,8 +138,8 @@ namespace BM {
 		// kernel calculates for each element C=A+B
 		std::string kernel_code =
 			"   __kernel void subMat(__global float* A, __global float* B){       "
-			"       A[get_global_id(0)]=A[get_global_id(0)]-B[get_global_id(0)];           "
-			"   }                                                                               ";
+			"       A[get_global_id(0)]=A[get_global_id(0)]-B[get_global_id(0)];    "
+			"   }                                                                     ";
 
 		cl::Program::Sources sources(1, std::make_pair(kernel_code.c_str(), kernel_code.length() + 1));
 
@@ -120,7 +169,7 @@ namespace BM {
 		return *this;
 	}
 
-	//--------------------------------------------------------------
+	//-----------------------------------------------------------------------
 
 	// Addition operation using '+' sign and creates a new matrix to pass
 
@@ -174,7 +223,6 @@ namespace BM {
 
 		cl::Context context({ defaultDevice });
 
-		// kernel calculates for each element C=A+B
 		std::string kernel_code =
 			"   __kernel void subMat(__global float* A, __global float* B){       "
 			"       A[get_global_id(0)]=A[get_global_id(0)]-B[get_global_id(0)];                 "
@@ -207,14 +255,15 @@ namespace BM {
 		return *temp;
 	}
 
-	//--------------------------------------------------------------
+	//----------------------------------------------------------------------------------------
+
 
 	// To extract data from the matrix for further calculations
 	float& mat::operator() (int rows,int cols) {
 		return data[rows * y + cols];
 	}
 	 
-	//---------------------------------------------------------------
+	//-----------------------------------------------------------------------------------------
 	
 
 	// Overloading -----(cout<<)----- function to output the matrix
@@ -228,7 +277,7 @@ namespace BM {
 			}
 			stream << "\n";
 		}
-		stream << " ]";
+		stream << " ]\n";
 		return stream;
 	}
 
@@ -239,7 +288,7 @@ namespace BM {
 		the system . 
 		The API used here is openCL 2.0 . And can change in future according to the needs and platform available. */
 
-	void Init() {
+	void init() {
 
 		cl::Platform::get(&allPlatforms);
 		if (allPlatforms.size() == 0) {
