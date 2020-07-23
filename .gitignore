@@ -4,7 +4,10 @@ Brain-Matrix-Test/bin/
 Brain-Matrix-Test/bin-int/
 
 #Files
-*.user
+Brain-Matrix/*.user
+Brain-Matrix-Test/*.user
 *.sln
-*.vcxproj
-*.filters
+Brain-Matrix/*.vcxproj
+Brain-Matrix-Test/*.vcxproj
+Brain-Matrix/*.filters
+Brain-Matrix-Test/*.filters
